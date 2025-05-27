@@ -32,4 +32,9 @@ public class UserController {
             return "User registration failed";
         }
     }
+
+    @GetMapping("/getUser")
+    public String getUser() {
+        return "Hello from User";
+    }
 }

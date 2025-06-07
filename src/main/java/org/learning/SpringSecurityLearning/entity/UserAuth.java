@@ -1,15 +1,11 @@
 package org.learning.SpringSecurityLearning.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "user_auth")
@@ -20,6 +16,9 @@ public class UserAuth implements UserDetails {
     private String username;
     private String password;
     private String role;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<UserPermissions> userPermissions = new ArrayList<>();
 
     public String getRole() {
         return role;
@@ -59,7 +58,15 @@ public class UserAuth implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role));
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        authorities.add(new SimpleGrantedAuthority(role));
+
+        for (UserPermissions userPermission : userPermissions) {
+            authorities.add(new SimpleGrantedAuthority(userPermission.getName()));
+        }
+
+        return authorities;
     }
 
     public String getPassword() {
@@ -68,5 +75,9 @@ public class UserAuth implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setUserPermissions(List<UserPermissions> permissions) {
+        userPermissions.addAll(permissions);
     }
 }

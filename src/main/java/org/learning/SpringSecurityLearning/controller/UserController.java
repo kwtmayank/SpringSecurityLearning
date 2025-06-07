@@ -24,6 +24,7 @@ public class UserController {
         userAuth.setUsername(userRequest.getUsername());
         userAuth.setPassword(encoder.encode(userRequest.getPassword()));
         userAuth.setRole(userRequest.getRole());
+        userAuth.setUserPermissions(userRequest.getPermissions());
          boolean result = userService.registerUser(userAuth);
 
         if (result) {
@@ -36,5 +37,10 @@ public class UserController {
     @GetMapping("/getUser")
     public String getUser() {
         return "Hello from User";
+    }
+
+    @GetMapping("/")
+    public String defaultEndpoint() {
+        return "This is from Default page";
     }
 }

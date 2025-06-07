@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -26,6 +28,7 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private JWTUtil jwtUtil;
@@ -55,19 +58,29 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    //For oauth
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .oauth2Login(Customizer.withDefaults());
+//        return http.build();
+//    }
+
+    //For JWT
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationManager authenticationManager, JWTUtil jwtUtil) throws Exception {
 
         JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter(authenticationManager, jwtUtil);
-
         JWTValidationFilter jwtValidationFilter = new JWTValidationFilter(authenticationManager);
-
         JWTRefreshFilter jwtRefreshFilter = new JWTRefreshFilter(jwtUtil, authenticationManager);
 
         // Configure which paths should be excluded from JWT authentication
         http.authorizeHttpRequests((authorize) ->
-                        authorize.requestMatchers("/user/register").permitAll()
+                        authorize.requestMatchers("/user/register").permitAll().
+                                requestMatchers("/h2-console").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement((sessionManagement) -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
